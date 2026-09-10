@@ -2,10 +2,17 @@ import type { Metadata } from "next";
 
 /**
  * Canonical origin for absolute URLs in metadata (OpenGraph, canonicals,
- * sitemap, robots). Override per deploy with NEXT_PUBLIC_SITE_URL.
+ * sitemap, robots).
+ *
+ *  1. NEXT_PUBLIC_SITE_URL          — set this once a custom domain is live
+ *  2. VERCEL_PROJECT_PRODUCTION_URL — Vercel fills this in automatically
+ *  3. the current deployment URL
  */
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.zimarchitects.com"
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "https://iaz-omega.vercel.app")
 ).replace(/\/$/, "");
 
 /**
