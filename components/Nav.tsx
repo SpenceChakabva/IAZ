@@ -105,6 +105,13 @@ function MobileNav({
   path: string;
   onClose: () => void;
 }) {
+  // accordion — one sub-list open at a time; collapse everything when the
+  // menu closes so it always reopens in the compact state
+  const [openSub, setOpenSub] = useState<string | null>(null);
+  useEffect(() => {
+    if (!open) setOpenSub(null);
+  }, [open]);
+
   return (
     <div
       id="mobile-nav"
@@ -112,28 +119,57 @@ function MobileNav({
       aria-hidden={!open}
     >
       <nav aria-label="Primary mobile">
-        {NAV.map((item) => (
-          <div
-            className={`m-item${path === item.href ? " is-active" : ""}`}
-            key={item.label}
-          >
-            <TransLink href={item.href} onClick={onClose}>
-              <span className="m-index" aria-hidden="true">
-                {String(NAV.indexOf(item) + 1).padStart(2, "0")}
-              </span>
-              {item.label}
-            </TransLink>
-            {item.sub && (
-              <div className="m-sub">
-                {item.sub.map((s) => (
-                  <TransLink key={s.label} href={s.href} onClick={onClose}>
-                    {s.label}
-                  </TransLink>
-                ))}
+        {NAV.map((item, i) => {
+          const expanded = openSub === item.label;
+          return (
+            <div
+              className={`m-item${path === item.href ? " is-active" : ""}${
+                expanded ? " is-expanded" : ""
+              }`}
+              key={item.label}
+            >
+              <div className="m-row">
+                <TransLink href={item.href} onClick={onClose}>
+                  <span className="m-index" aria-hidden="true">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  {item.label}
+                </TransLink>
+                {item.sub && (
+                  <button
+                    type="button"
+                    className="m-toggle"
+                    aria-expanded={expanded}
+                    aria-controls={`m-sub-${item.label}`}
+                    aria-label={`${expanded ? "Collapse" : "Expand"} ${
+                      item.label
+                    } links`}
+                    onClick={() =>
+                      setOpenSub((cur) => (cur === item.label ? null : item.label))
+                    }
+                  >
+                    <span className="m-toggle-icon" aria-hidden="true" />
+                  </button>
+                )}
               </div>
-            )}
-          </div>
-        ))}
+              {item.sub && (
+                <div
+                  className="m-sub"
+                  id={`m-sub-${item.label}`}
+                  inert={!expanded}
+                >
+                  <div className="m-sub-in">
+                    {item.sub.map((s) => (
+                      <TransLink key={s.label} href={s.href} onClick={onClose}>
+                        {s.label}
+                      </TransLink>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </nav>
 
       <div className="m-foot">
