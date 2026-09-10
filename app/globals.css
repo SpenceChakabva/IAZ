@@ -55,6 +55,11 @@ html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: auto; /* Lenis owns scrolling */
   overscroll-behavior: none;
+  overflow-x: clip; /* nothing wide (fixed curtains, marquee) creates a sideways scroll */
+}
+html.menu-open,
+html.menu-open body {
+  overflow: hidden;
 }
 
 body {
@@ -1048,6 +1053,11 @@ button {
   backdrop-filter: blur(6px);
   border-bottom: 1px solid var(--line-2);
 }
+/* while the mobile menu is open, keep the bar (brand + burger) above it */
+.menu-open .topbar {
+  z-index: 342;
+  background: var(--paper);
+}
 .topbar-in {
   max-width: var(--maxw);
   margin-inline: auto;
@@ -1222,12 +1232,169 @@ button {
 .nav-join .btn-fill-icon {
   padding: 0 clamp(0.7rem, 1.2vw, 1rem);
 }
+/* ---------- mobile menu ---------- */
+.nav-burger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  align-self: stretch;
+  border: 0;
+  border-left: 1px solid var(--line-2);
+  background: transparent;
+  cursor: pointer;
+  color: var(--ink);
+  position: relative;
+  z-index: 341;
+}
+.nav-burger span {
+  position: absolute;
+  left: 50%;
+  width: 20px;
+  height: 1.5px;
+  margin-left: -10px;
+  background: currentColor;
+  transition: transform 0.3s var(--ease), opacity 0.2s;
+}
+.nav-burger span:first-child { transform: translateY(-4px); }
+.nav-burger span:last-child { transform: translateY(4px); }
+.nav-burger.is-open span:first-child { transform: rotate(45deg); }
+.nav-burger.is-open span:last-child { transform: rotate(-45deg); }
+
+.mobile-nav {
+  position: fixed;
+  inset: 0;
+  z-index: 340;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: calc(60px + env(safe-area-inset-top)) 0 env(safe-area-inset-bottom);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-1.5%);
+  transition: opacity 0.3s var(--ease), transform 0.35s var(--ease),
+    visibility 0s linear 0.35s;
+}
+.mobile-nav.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.3s var(--ease), transform 0.35s var(--ease);
+}
+.no-motion .mobile-nav {
+  transition: none;
+}
+.mobile-nav nav {
+  border-top: 1px solid var(--line-2);
+}
+.m-item {
+  border-bottom: 1px solid var(--line);
+}
+.m-item > a {
+  display: flex;
+  align-items: baseline;
+  gap: 1ch;
+  padding: 1.05rem var(--gutter);
+  font-family: var(--font-geist), sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  font-size: clamp(1.6rem, 1.1rem + 3vw, 2.1rem);
+  line-height: 1;
+  color: var(--ink);
+}
+.m-item.is-active > a {
+  color: var(--accent);
+}
+.m-index {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+}
+.m-sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.2rem;
+  padding: 0 var(--gutter) 1rem calc(var(--gutter) + 3.2ch);
+}
+.m-sub a {
+  padding: 0.35rem 0;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.m-sub a:active { color: var(--accent); }
+.m-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.4rem var(--gutter) calc(1.4rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line-2);
+}
+.m-theme,
+.m-join {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 0 1.1rem;
+  border: 1px solid var(--ink);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.m-join {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
 @media (max-width: 1000px) {
   .nav-item:not(.nav-keep) {
     display: none;
   }
+  /* the theme control moves into the menu on mobile */
+  .nav-item.nav-keep {
+    display: none;
+  }
+  .nav-burger {
+    display: flex;
+  }
   .brand b {
     font-size: 0.82rem;
+  }
+}
+@media (max-width: 380px) {
+  /* keep the row from overflowing on the narrowest phones */
+  .nav-join.btn-fill {
+    display: none;
+  }
+}
+@media (min-width: 1001px) {
+  /* desktop nav is always present; keep the panel out of the a11y tree */
+  .mobile-nav {
+    display: none;
+  }
+}
+@media (max-width: 460px) {
+  .brand b {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 }
 
@@ -2105,6 +2272,88 @@ table.reg .prn {
   transform: scaleY(0);
   transform-origin: bottom;
   pointer-events: none;
+}
+
+/* ============================================================
+   MOBILE / TOUCH polish — layout stays intact, only spacing,
+   tap targets and input behaviour change
+   ============================================================ */
+@media (hover: none) {
+  /* no sticky :hover states on touch — keep the resting look */
+  .article-link:hover,
+  table.reg tbody tr:hover,
+  .nav-drop a:hover {
+    background: transparent;
+  }
+  .belt:hover .belt-track {
+    animation-play-state: running;
+  }
+}
+
+@media (max-width: 640px) {
+  /* iOS zooms any input under 16px on focus — hold the search + subscribe
+     fields at 16px (their visual size is set by padding, not font-size) */
+  .reg-bar .f input,
+  .reg-bar .f select,
+  .foot .sub input {
+    font-size: 16px;
+  }
+  .reg-bar .f {
+    flex: 1 1 100%;
+    border-right: 0;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .reg-bar .f-count {
+    margin-left: 0;
+    align-items: flex-start;
+    border-bottom: 0;
+  }
+
+  /* stacked label / value rows read better than a squeezed space-between */
+  .mem .fees .frow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+  }
+  .mem .fees .frow span:first-child {
+    color: var(--ink-3);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+  }
+  .mem .fees .frow span:last-child {
+    font-size: 0.82rem;
+  }
+
+  /* a 3:4 hero image is very tall on a phone — cap it */
+  .page-hero-grid .ink-image {
+    aspect-ratio: 4 / 3 !important;
+  }
+
+  .article-nav {
+    font-size: 0.62rem;
+  }
+  .loader-count {
+    font-size: 0.58rem;
+    text-align: center;
+    padding: 0 var(--gutter);
+  }
+}
+
+/* comfortable tap targets + no grey flash on tap */
+a,
+button,
+input,
+select,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+@media (pointer: coarse) {
+  .btn-fill,
+  .cta .btn,
+  .m-item > a,
+  .article-nav a {
+    min-height: 44px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

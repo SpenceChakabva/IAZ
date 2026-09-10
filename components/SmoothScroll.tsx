@@ -22,9 +22,8 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       syncTouch: true,
     });
     lenisRef.current = lenis;
-    if (process.env.NODE_ENV !== "production") {
-      (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
-    }
+    // exposed so the mobile menu can pause/resume scroll while it's open
+    (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
 
     // one clock: GSAP drives Lenis, Lenis drives ScrollTrigger
     lenis.on("scroll", ScrollTrigger.update);

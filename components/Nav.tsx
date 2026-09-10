@@ -1,18 +1,43 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMagnetic } from "@/lib/useMagnetic";
 import { NAV } from "@/lib/content";
-import { gsap } from "@/lib/gsap";
+import { toggleTheme } from "@/lib/theme";
 import TransLink from "./TransLink";
 import PixelSweep from "./PixelSweep";
 
 export default function Nav() {
   const joinRef = useMagnetic<HTMLAnchorElement>(0.2);
   const path = usePathname();
+  const [menu, setMenu] = useState(false);
+
+  // close the mobile menu whenever the route changes
+  useEffect(() => {
+    setMenu(false);
+  }, [path]);
+
+  // lock scroll + allow Escape while the menu is open
+  useEffect(() => {
+    const root = document.documentElement;
+    const lenis = (window as unknown as { __lenis?: { stop(): void; start(): void } })
+      .__lenis;
+    if (menu) {
+      root.classList.add("menu-open");
+      lenis?.stop();
+      const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenu(false);
+      window.addEventListener("keydown", onKey);
+      return () => {
+        window.removeEventListener("keydown", onKey);
+      };
+    }
+    root.classList.remove("menu-open");
+    lenis?.start();
+  }, [menu]);
 
   return (
+    <>
     <header className="topbar">
       <div className="topbar-in">
         <TransLink href="/" className="brand" data-cursor="Home">
@@ -39,13 +64,92 @@ export default function Nav() {
           ))}
 
           <div className="nav-item nav-keep">
-            <ThemeToggle />
+            <button
+              className="themebtn"
+              type="button"
+              onClick={toggleTheme}
+              aria-label="Toggle light or dark theme"
+            >
+              Theme
+            </button>
           </div>
 
           <NavJoin joinRef={joinRef} />
+
+          <button
+            type="button"
+            className={`nav-burger${menu ? " is-open" : ""}`}
+            aria-label={menu ? "Close menu" : "Open menu"}
+            aria-expanded={menu}
+            aria-controls="mobile-nav"
+            onClick={() => setMenu((m) => !m)}
+          >
+            <span />
+            <span />
+          </button>
         </nav>
       </div>
     </header>
+
+    <MobileNav open={menu} path={path} onClose={() => setMenu(false)} />
+    </>
+  );
+}
+
+function MobileNav({
+  open,
+  path,
+  onClose,
+}: {
+  open: boolean;
+  path: string;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      id="mobile-nav"
+      className={`mobile-nav${open ? " is-open" : ""}`}
+      aria-hidden={!open}
+    >
+      <nav aria-label="Primary mobile">
+        {NAV.map((item) => (
+          <div
+            className={`m-item${path === item.href ? " is-active" : ""}`}
+            key={item.label}
+          >
+            <TransLink href={item.href} onClick={onClose}>
+              <span className="m-index" aria-hidden="true">
+                {String(NAV.indexOf(item) + 1).padStart(2, "0")}
+              </span>
+              {item.label}
+            </TransLink>
+            {item.sub && (
+              <div className="m-sub">
+                {item.sub.map((s) => (
+                  <TransLink key={s.label} href={s.href} onClick={onClose}>
+                    {s.label}
+                  </TransLink>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </nav>
+
+      <div className="m-foot">
+        <button
+          type="button"
+          className="m-theme"
+          onClick={toggleTheme}
+          aria-label="Toggle light or dark theme"
+        >
+          Switch theme
+        </button>
+        <TransLink href="/contact" className="m-join" onClick={onClose}>
+          Join the Institute <span aria-hidden="true">&rarr;</span>
+        </TransLink>
+      </div>
+    </div>
   );
 }
 
@@ -109,70 +213,5 @@ function NavJoin({ joinRef }: { joinRef: React.Ref<HTMLAnchorElement> }) {
         </span>
       </span>
     </TransLink>
-  );
-}
-
-function ThemeToggle() {
-  const busy = useRef(false);
-
-  const apply = (root: HTMLElement, next: string) => {
-    root.setAttribute("data-theme", next);
-    try {
-      localStorage.setItem("iaz-theme", next);
-    } catch {}
-  };
-
-  const toggle = () => {
-    if (busy.current) return;
-    const root = document.documentElement;
-    const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
-
-    if (root.classList.contains("no-motion")) {
-      apply(root, next);
-      return;
-    }
-
-    busy.current = true;
-    // a band sweeps across the viewport; the theme flips behind it at the
-    // moment it covers, so you see the new palette arrive on a wipe
-    const wipe = document.createElement("div");
-    wipe.className = "theme-wipe";
-    wipe.style.setProperty("--wipe", next === "dark" ? "#1a1a17" : "#f3f2ee");
-    wipe.style.setProperty("--wipe-edge", next === "dark" ? "#ff5a2c" : "#fa3600");
-    document.body.appendChild(wipe);
-
-    // guards so a stalled ticker can't leave the theme half-applied or the
-    // band stuck on screen
-    let flipped = false;
-    const flip = () => {
-      if (flipped) return;
-      flipped = true;
-      apply(root, next);
-    };
-    let cleared = false;
-    const clear = () => {
-      if (cleared) return;
-      cleared = true;
-      wipe.remove();
-      busy.current = false;
-    };
-
-    gsap
-      .timeline({ onComplete: clear })
-      .fromTo(
-        wipe,
-        { xPercent: -100 },
-        { xPercent: 0, duration: 0.4, ease: "power3.inOut", onComplete: flip }
-      )
-      .to(wipe, { xPercent: 101, duration: 0.46, ease: "power3.inOut" }, ">-0.03");
-
-    setTimeout(flip, 460);
-    setTimeout(clear, 1100);
-  };
-
-  return (
-    <button className="themebtn" type="button" onClick={toggle} aria-label="Toggle theme">
-      Theme
-    </button>
   );
 }
