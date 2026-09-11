@@ -1059,6 +1059,16 @@ button {
   background: color-mix(in srgb, var(--paper) 92%, transparent);
   backdrop-filter: blur(6px);
   border-bottom: 1px solid var(--line-2);
+  transform: translateY(0);
+  transition: transform 0.4s var(--ease);
+}
+/* scrolling down past the hero tucks it away; scrolling up (or the menu
+   being open) brings it straight back */
+.topbar.is-hidden {
+  transform: translateY(-101%);
+}
+.no-motion .topbar {
+  transition: none;
 }
 /* while the mobile menu is open, keep the bar (brand + burger) above it */
 .menu-open .topbar {

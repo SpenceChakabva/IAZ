@@ -98,41 +98,70 @@ export default function Hero() {
           stroke="var(--ink)"
           strokeWidth={1.3}
           strokeLinejoin="round"
-          aria-label="Line drawing of a civic building elevation with bare trees"
+          aria-label="Line drawing of a building elevation: a masonry civic wing with an entrance, a tall glazed tower, and a cantilevered wing, set between two bare trees"
         >
           <line className="draw" x1="40" y1="438" x2="940" y2="438" />
-          {/* left block */}
-          <path className="draw" d="M170 438V236h160v202" />
-          <path className="draw" d="M170 236l26-22h160l-26 22" />
-          <path className="draw" d="M330 236l26-22v202l-26 22" />
-          <path className="draw" d="M192 262h54v36h-54zM266 262h48v36h-48zM192 324h54v42h-54zM266 324h48v42h-48z" />
-          <g stroke="var(--ink-3)" strokeWidth={0.7}>
-            <path className="draw" d="M170 236l10 8M192 236l10 8M214 236l10 8M236 236l10 8M258 236l10 8M280 236l10 8M302 236l10 8M324 236l10 8" />
+
+          {/* civic wing — masonry, flat coped parapet, recessed entrance */}
+          <path className="draw" d="M200 438V252H370V438" />
+          <path className="draw" d="M194 252H376" />
+          <path className="draw" d="M200 260H370" />
+          <path className="draw" d="M216 280h30v36h-30zM270 280h30v36h-30zM324 280h30v36h-30zM216 328h30v34h-30zM270 328h30v34h-30zM324 328h30v34h-30z" />
+          <g stroke="var(--ink-3)" strokeWidth={0.6}>
+            <path className="draw" d="M252 288l12-12M252 300l12-12M252 312l12-12" />
           </g>
-          {/* central glazed volume */}
-          <path className="draw" d="M400 438V120h180v318" />
-          <path className="draw" d="M400 120l32-28h180l-32 28" />
-          <path className="draw" d="M580 120l32-28v318l-32 28" />
+          <path className="draw" d="M254 438V392H290V438" />
+          <path className="draw" d="M240 378H304M248 378V392M296 378V392" />
+
+          {/* glazed tower — tallest, roof plane receding for depth */}
+          <path className="draw" d="M410 438V100H610V438" />
+          <path className="draw" d="M410 100l30-26h200l-30 26" />
+          <path className="draw" d="M610 100l30-26v338l-30 26" />
           <g strokeWidth={0.9}>
-            <path className="draw" d="M400 180h180M400 240h180M400 300h180M400 360h180M400 414h180" />
-            <path className="draw" d="M445 120v318M490 120v318M535 120v318" />
+            <path className="draw" d="M410 160h200M410 220h200M410 280h200M410 340h200M410 400h200" />
+            <path className="draw" d="M460 100v338M510 100v338M560 100v338" />
           </g>
-          {/* right block + cantilever */}
-          <path className="draw" d="M640 438V214h160v224" />
-          <path className="draw" d="M640 214l26-22h160l-26 22" />
-          <path className="draw" d="M800 214l26-22v224l-26 22" />
-          <path className="draw" d="M770 214v-36h130v36" />
-          <path className="draw" d="M662 244h48v32h-48zM726 244h54v32h-54zM662 304h48v50h-48zM726 304h54v50h-54z" />
-          {/* steps */}
-          <path className="draw" d="M62 438v-12h28v-12h28v-12h28v-12h28" />
-          {/* bare trees */}
+
+          {/* dimension / level line, set in the gap ahead of the tower */}
+          <g stroke="var(--ink-3)" strokeWidth={0.6}>
+            <path className="draw" d="M393 100V438M387 100h12M387 438h12" />
+          </g>
+
+          {/* cantilevered wing */}
+          <path className="draw" d="M660 438V234H830V438" />
+          <path className="draw" d="M830 234l14-12v204l-14 12" />
+          <path className="draw" d="M678 280h134v54h-134z" />
+          <path className="draw" d="M760 234v-40h140v40" />
+          <path className="draw" d="M830 234h70" />
+          <path className="draw" d="M776 204h30v20h-30zM846 204h30v20h-30z" />
+          <g stroke="var(--ink-3)" strokeWidth={0.6}>
+            <path className="draw" d="M650 438v-7" />
+          </g>
+
+          {/* steps up to plaza level */}
+          <path className="draw" d="M110 438v-12h20v-12h20v-12h20v-12h20" />
+
+          {/* bare trees, flanking the composition */}
           <g strokeWidth={1}>
-            <path className="draw" d="M118 438V300M118 342l-24-28M118 358l26-30M118 320l-18-22M118 376l20-22" />
-            <path className="draw" d="M868 438V314M868 350l22-26M868 362l-20-24M868 332l16-18M868 380l-18-20" stroke="var(--ink-2)" strokeWidth={0.9} />
+            <path className="draw" d="M75 438V300M75 350l-22-18M75 330l24-20M75 370l-20-16M75 310l16-14" />
           </g>
+          <g stroke="var(--ink-2)" strokeWidth={0.9}>
+            <path className="draw" d="M905 438V310M905 360l24-18M905 340l-20-16M905 380l22-16M905 320l-16-14" />
+          </g>
+
+          {/* surveyed-point node marks */}
+          <g className="hero-deco" stroke="var(--ink-3)" strokeWidth={0.8}>
+            <line x1="406" y1="438" x2="414" y2="438" />
+            <line x1="410" y1="434" x2="410" y2="442" />
+          </g>
+          <g className="hero-deco" stroke="var(--ink-3)" strokeWidth={0.8}>
+            <line x1="826" y1="438" x2="834" y2="438" />
+            <line x1="830" y1="434" x2="830" y2="442" />
+          </g>
+
           {/* accent squares */}
-          <rect className="hero-deco" x="342" y="296" width="12" height="12" />
-          <rect className="hero-deco" x="712" y="304" width="12" height="12" />
+          <rect className="hero-deco" x="470" y="408" width="12" height="12" />
+          <rect className="hero-deco" x="780" y="300" width="12" height="12" />
         </svg>
       </div>
 

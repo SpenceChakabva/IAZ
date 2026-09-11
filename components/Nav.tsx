@@ -12,11 +12,47 @@ export default function Nav() {
   const joinRef = useMagnetic<HTMLAnchorElement>(0.2);
   const path = usePathname();
   const [menu, setMenu] = useState(false);
+  const [hidden, setHidden] = useState(false);
 
-  // close the mobile menu whenever the route changes
+  // close the mobile menu + bring the bar back whenever the route changes
   useEffect(() => {
     setMenu(false);
+    setHidden(false);
   }, [path]);
+
+  // never leave the bar tucked away while the menu is open (its own toggle
+  // lives inside it)
+  useEffect(() => {
+    if (menu) setHidden(false);
+  }, [menu]);
+
+  // tuck the bar away on scroll-down, bring it straight back on scroll-up —
+  // always visible near the top regardless of direction
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let ticking = false;
+
+    const update = () => {
+      ticking = false;
+      const y = window.scrollY;
+      const delta = y - lastY;
+      lastY = y;
+      if (menu) return;
+      if (y < 72) setHidden(false);
+      else if (delta > 6) setHidden(true);
+      else if (delta < -6) setHidden(false);
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [menu]);
 
   // lock scroll + allow Escape while the menu is open
   useEffect(() => {
@@ -38,7 +74,7 @@ export default function Nav() {
 
   return (
     <>
-    <header className="topbar">
+    <header className={`topbar${hidden ? " is-hidden" : ""}`}>
       <div className="topbar-in">
         <TransLink href="/" className="brand" data-cursor="Home">
           <svg
