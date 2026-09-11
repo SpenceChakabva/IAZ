@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { gsap, useGSAP } from "@/lib/gsap";
+import { gsap, useGSAP, ScrollTrigger } from "@/lib/gsap";
 import SplitReveal from "./SplitReveal";
 import Reveal from "./Reveal";
 import { ROUTE } from "@/lib/content";
@@ -28,6 +28,30 @@ export default function RouteToReg() {
       }
 
       gsap.set(steps, { opacity: 0.35, y: 14 });
+
+      /* ---- mobile / touch: no pin, no scrub — pinned sections fight momentum
+         scroll and the address-bar resize. Each step just fades + rises in and
+         its bar fills as it enters. Same payoff, no scroll trap. ---- */
+      const lite =
+        window.matchMedia("(pointer: coarse)").matches ||
+        window.matchMedia("(max-width: 900px)").matches;
+
+      if (lite) {
+        steps.forEach((s) => {
+          const bar = s.querySelector(".bar");
+          gsap.set(bar, { scaleX: 0 });
+          ScrollTrigger.create({
+            trigger: s,
+            start: "top 85%",
+            once: true,
+            onEnter: () => {
+              gsap.to(s, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" });
+              gsap.to(bar, { scaleX: 1, duration: 0.8, ease: "none" });
+            },
+          });
+        });
+        return;
+      }
 
       const tl = gsap.timeline({
         scrollTrigger: {

@@ -37,12 +37,15 @@ export default function SplitReveal({
         autoSplit: true,
       });
 
+      // phones: tighten the reveal a touch so it doesn't feel heavy
+      const sm = window.matchMedia("(max-width: 700px)").matches;
+
       gsap.set(split.lines, { yPercent: 110 });
       gsap.to(split.lines, {
         yPercent: 0,
-        duration: 0.9,
+        duration: sm ? 0.7 : 0.9,
         ease: "expo.out",
-        stagger: 0.09,
+        stagger: sm ? 0.06 : 0.09,
         delay,
         scrollTrigger: {
           trigger: el,

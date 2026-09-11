@@ -16,15 +16,19 @@ export default function Loader() {
     }
     const el = root.current!;
     const obj = { v: 0 };
+    // phones: trim the hold so first paint isn't blocked ~1s
+    const fast = window.matchMedia("(max-width: 700px)").matches;
+    const barDur = fast ? 0.45 : 0.6;
+    const slideDur = fast ? 0.35 : 0.42;
     const tl = gsap.timeline({
       onComplete: () => setDone(true),
     });
-    tl.to(bar.current!, { scaleX: 1, duration: 0.6, ease: "power2.inOut" }, 0)
+    tl.to(bar.current!, { scaleX: 1, duration: barDur, ease: "power2.inOut" }, 0)
       .to(
         obj,
         {
           v: 100,
-          duration: 0.6,
+          duration: barDur,
           ease: "power2.inOut",
           onUpdate: () => {
             if (count.current)
@@ -33,7 +37,7 @@ export default function Loader() {
         },
         0
       )
-      .to(el, { yPercent: -100, duration: 0.42, ease: "expo.inOut" }, ">+0.08");
+      .to(el, { yPercent: -100, duration: slideDur, ease: "expo.inOut" }, ">+0.08");
     return () => {
       tl.kill();
     };

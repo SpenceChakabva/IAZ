@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { gsap, useGSAP, ScrollTrigger } from "@/lib/gsap";
 
 /**
@@ -46,6 +46,22 @@ export default function InkImage({
   const [subDone, setSubDone] = useState(false);
   const [hovering, setHovering] = useState(false);
 
+  /**
+   * `lite` — touch / small screen: skip the feTurbulence + feDisplacementMap +
+   * blur (very costly on mobile GPUs). The `.ii-sub` layer still mounts and its
+   * wavy mask edge still rises through the picture; only the smear is dropped.
+   * Resolved after mount so server and first client render stay identical.
+   */
+  const [env, setEnv] = useState({ mounted: false, lite: false });
+  useEffect(() => {
+    setEnv({
+      mounted: true,
+      lite:
+        window.matchMedia("(pointer: coarse)").matches ||
+        window.matchMedia("(max-width: 700px)").matches,
+    });
+  }, []);
+
   const uid = useId().replace(/[:]/g, "");
   const fid = `ink-f-${uid}`;
   const mid = `ink-m-${uid}`;
@@ -63,6 +79,8 @@ export default function InkImage({
         setSubDone(true);
         return;
       }
+      // wait until the .ii-sub layer is actually mounted (post-detection)
+      if (!env.mounted) return;
 
       /* ---- the wipe: only the mask edge + a gentle displacement ease-off ---- */
       const setEdge = (y: number) =>
@@ -102,7 +120,7 @@ export default function InkImage({
         });
       }
     },
-    { scope, dependencies: [start, mode] }
+    { scope, dependencies: [start, mode, env.mounted, env.lite] }
   );
 
   /* ---- pointer-driven dissolve (mounted only while hovering) ---- */
@@ -153,7 +171,7 @@ export default function InkImage({
     >
       <img className="ii-main" src={src} alt={alt} />
 
-      {!subDone && (
+      {env.mounted && !subDone && (
         <svg
           className="ii-sub"
           viewBox="0 0 400 300"
@@ -163,9 +181,13 @@ export default function InkImage({
           <defs>
             <filter id={fid} x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
               <feColorMatrix in="SourceGraphic" type="saturate" values="0" result="g" />
-              <feTurbulence type="fractalNoise" baseFrequency="0.05 0.06" numOctaves="2" seed="5" result="n" />
-              <feDisplacementMap ref={disp} in="g" in2="n" scale="34" xChannelSelector="R" yChannelSelector="G" result="d" />
-              <feGaussianBlur in="d" stdDeviation="1.2" />
+              {!env.lite && (
+                <>
+                  <feTurbulence type="fractalNoise" baseFrequency="0.05 0.06" numOctaves="2" seed="5" result="n" />
+                  <feDisplacementMap ref={disp} in="g" in2="n" scale="34" xChannelSelector="R" yChannelSelector="G" result="d" />
+                  <feGaussianBlur in="d" stdDeviation="1.2" />
+                </>
+              )}
             </filter>
             <mask id={mid}>
               <path ref={maskP} d="M0,350 Q200,420 400,350 L400,-300 L0,-300 Z" fill="#fff" />

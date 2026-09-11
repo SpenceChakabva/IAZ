@@ -40,19 +40,30 @@ export default function Statement() {
         scrollTrigger: { trigger: root, start: "top 78%" },
       });
 
+      // Attr-scrub on an SVG transform is jittery on mobile GPUs — on touch,
+      // run the same mask sweep once as a plain tween instead of a scrub.
+      const lite = window.matchMedia("(pointer: coarse)").matches;
+
       gsap.fromTo(
         mask.current,
         { attr: { transform: "translate(0,420)" } },
-        {
-          attr: { transform: "translate(0,0)" },
-          ease: "none",
-          scrollTrigger: {
-            trigger: root,
-            start: "top 80%",
-            end: "top 30%",
-            scrub: 0.6,
-          },
-        }
+        lite
+          ? {
+              attr: { transform: "translate(0,0)" },
+              duration: 1,
+              ease: "power2.out",
+              scrollTrigger: { trigger: root, start: "top 75%", once: true },
+            }
+          : {
+              attr: { transform: "translate(0,0)" },
+              ease: "none",
+              scrollTrigger: {
+                trigger: root,
+                start: "top 80%",
+                end: "top 30%",
+                scrub: 0.6,
+              },
+            }
       );
     },
     { scope, dependencies: [] }
