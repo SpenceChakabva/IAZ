@@ -70,6 +70,9 @@ body {
   font-size: 15px;
   line-height: 1.5;
   letter-spacing: -0.006em;
+  /* a long unbroken token (an email, a practice name) gets a break
+     opportunity instead of forcing horizontal scroll on a narrow phone */
+  overflow-wrap: break-word;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E");
