@@ -55,7 +55,11 @@ html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: auto; /* Lenis owns scrolling */
   overscroll-behavior: none;
-  overflow-x: clip; /* nothing wide (fixed curtains, marquee) creates a sideways scroll */
+  /* overflow-x lives on body only (below). Declaring it here too would give
+     both html AND body their own non-visible overflow, which disables the
+     CSS body -> viewport overflow-propagation special case and breaks every
+     `position: sticky` element (the topbar, the article sidebar) — they'd
+     scroll away with the page instead of sticking. */
 }
 html.menu-open,
 html.menu-open body {
